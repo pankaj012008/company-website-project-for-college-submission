@@ -1,0 +1,75 @@
+<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ffed4e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#daa520;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="eyeGradient" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" style="stop-color:#87ceeb;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e90ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00008b;stop-opacity:1" />
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Shield Background -->
+  <path d="M 100 10 L 160 30 L 160 90 Q 160 150 100 180 Q 40 150 40 90 L 40 30 Z" fill="url(#goldGradient)" stroke="#b8860b" stroke-width="1.5" filter="url(#glow)"/>
+  
+  <!-- Shield Inner Shadow -->
+  <path d="M 100 15 L 155 32 L 155 90 Q 155 145 100 175 Q 45 145 45 90 L 45 32 Z" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+
+  <!-- Filmstrip Arc (Top) -->
+  <g transform="translate(100, 35)">
+    <!-- Outer Arc -->
+    <path d="M -35 -10 A 45 45 0 0 1 35 -10" fill="none" stroke="url(#goldGradient)" stroke-width="8" stroke-linecap="round"/>
+    <!-- Film holes -->
+    <circle cx="-24" cy="-8" r="5" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+    <circle cx="-10" cy="-12" r="4" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+    <circle cx="4" cy="-12" r="3.5" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+    <circle cx="18" cy="-10" r="4" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+    <circle cx="30" cy="-6" r="5" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+  </g>
+
+  <!-- Eye (Main Feature) -->
+  <g transform="translate(100, 65)">
+    <!-- Eye White -->
+    <ellipse cx="0" cy="0" rx="28" ry="32" fill="white" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+    <!-- Eye Iris -->
+    <circle cx="0" cy="2" r="18" fill="url(#eyeGradient)" stroke="#00008b" stroke-width="0.5"/>
+    <!-- Eye Pupil -->
+    <circle cx="2" cy="0" r="11" fill="#000"/>
+    <!-- Eye Highlight -->
+    <circle cx="6" cy="-4" r="4" fill="white" opacity="0.8"/>
+    <circle cx="5" cy="-5" r="2" fill="white" opacity="0.6"/>
+  </g>
+
+  <!-- Filmstrip Arc (Bottom) -->
+  <g transform="translate(100, 130)">
+    <!-- Outer Arc -->
+    <path d="M -35 8 A 45 45 0 0 0 35 8" fill="none" stroke="url(#goldGradient)" stroke-width="8" stroke-linecap="round"/>
+    <!-- Film holes -->
+    <circle cx="-28" cy="10" r="5" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+    <circle cx="-14" cy="12" r="4" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+    <circle cx="0" cy="13" r="3.5" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+    <circle cx="14" cy="12" r="4" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+    <circle cx="28" cy="10" r="5" fill="#000" stroke="#8b7500" stroke-width="0.5"/>
+  </g>
+
+  <!-- Star at bottom -->
+  <g transform="translate(100, 165)">
+    <polygon points="0,-8 2.4,-2.4 8,-0.8 3.2,3.2 4.8,9 0,5.2 -4.8,9 -3.2,3.2 -8,-0.8 -2.4,-2.4" fill="url(#goldGradient)" stroke="#b8860b" stroke-width="0.3" filter="url(#glow)"/>
+  </g>
+
+  <!-- Main Text: CINEMA -->
+  <text x="100" y="205" font-family="Arial, sans-serif" font-size="24" font-weight="900" text-anchor="middle" fill="url(#goldGradient)" letter-spacing="3" filter="url(#glow)">CINEMA</text>
+  
+  <!-- Subtitle: INSIGHT -->
+  <text x="100" y="225" font-family="Arial, sans-serif" font-size="11" font-weight="300" text-anchor="middle" fill="white" letter-spacing="2">INSIGHT</text>
+</svg>

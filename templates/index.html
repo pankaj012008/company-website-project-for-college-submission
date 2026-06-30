@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cinema Insight</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<style>
+:root{
+  --bg-base:#0a0a0f;
+  --bg-surface:#111118;
+  --bg-card:#181820;
+  --bg-hover:#1e1e28;
+  --accent:#e8b84b;
+  --accent-dim:#c99b38;
+  --accent-glow:rgba(232,184,75,0.18);
+  --red:#e84b4b;
+  --green:#4be87a;
+  --blue:#4b9ee8;
+  --text-primary:#f0eee8;
+  --text-secondary:#a09b90;
+  --text-muted:#5a5650;
+  --border:#252530;
+  --border-accent:rgba(232,184,75,0.3);
+  --sidebar-w:240px;
+  --radius:10px;
+  --transition:.2s ease;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg-base);color:var(--text-primary);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;}
+a{color:inherit;text-decoration:none;}
+button,input,select,textarea{font-family:inherit;font-size:inherit;}
+img{display:block;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--bg-base);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* LAYOUT */
+.layout{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--bg-surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;height:100vh;
+  z-index:100;
+}
+.sidebar-logo{
+  padding:22px 20px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.logo-icon{
+  width:38px;height:38px;
+  background:var(--accent);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--bg-base);font-weight:900;flex-shrink:0;
+}
+.sidebar-logo-img{
+  width:50px;
+  height:50px;
+  border-radius:12px;
+  object-fit:contain;
+  margin-right:10px;
+  filter:drop-shadow(0 0 10px rgba(232,184,75,0.3));
+  transition:all .3s ease;
+}
+.sidebar-logo:hover .sidebar-logo-img{
+  transform:scale(1.1);
+  filter:drop-shadow(0 0 15px rgba(232,184,75,0.5));
+}
+.logo-text{font-size:15px;font-weight:700;color:var(--text-primary);line-height:1.2;}
+.logo-text span{color:var(--accent);}
+.sidebar-nav{padding:16px 0;flex:1;overflow-y:auto;}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 22px;
+  color:var(--text-secondary);
+  transition:var(--transition);
+  cursor:pointer;
+  border-left:3px solid transparent;
+  font-weight:500;
+  background:none;border-right:none;border-top:none;border-bottom:none;
+  width:100%;text-align:left;
+}
+.nav-item:hover{color:var(--text-primary);background:var(--bg-hover);border-left-color:var(--accent);}
+.nav-item.active{color:var(--accent);background:var(--bg-hover);border-left-color:var(--accent);}
+.nav-item i{width:20px;text-align:center;font-size:15px;}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
+.sidebar-user{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sidebar-avatar{
+  width:34px;height:34px;background:var(--accent);
+  border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-weight:700;font-size:13px;
+  color:var(--bg-base);flex-shrink:0;
+}
+.sidebar-username{font-size:13px;font-weight:600;color:var(--text-primary);}
+.sidebar-role{font-size:11px;color:var(--text-muted);}
+.btn-logout,.btn-login-side{
+  width:100%;padding:9px;border-radius:8px;
+  font-size:13px;font-weight:600;cursor:pointer;border:none;
+  transition:var(--transition);
+}
+.btn-logout{background:rgba(232,75,75,0.12);color:var(--red);}
+.btn-logout:hover{background:rgba(232,75,75,0.22);}
+.btn-login-side{background:var(--accent);color:var(--bg-base);}
+.btn-login-side:hover{background:var(--accent-dim);}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;}
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(10,10,15,0.85);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:14px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-title{font-size:17px;font-weight:700;color:var(--text-primary);}
+.topbar-actions{display:flex;align-items:center;gap:12px;}
+.page-content{padding:32px;}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;border-radius:8px;font-weight:600;
+  cursor:pointer;border:none;transition:var(--transition);font-size:14px;
+}
+.btn-primary{background:var(--accent);color:var(--bg-base);}
+.btn-primary:hover{background:var(--accent-dim);transform:translateY(-1px);}
+.btn-secondary{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border);}
+.btn-secondary:hover{background:var(--bg-hover);border-color:var(--accent);}
+.btn-danger{background:rgba(232,75,75,0.12);color:var(--red);border:1px solid rgba(232,75,75,0.2);}
+.btn-danger:hover{background:rgba(232,75,75,0.22);}
+.btn-sm{padding:7px 14px;font-size:12px;}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border);}
+.btn-ghost:hover{color:var(--text-primary);border-color:var(--text-muted);}
+
+/* CARDS */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.card-title{font-size:13px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.card-value{font-size:28px;font-weight:800;color:var(--text-primary);}
+.card-value.accent{color:var(--accent);}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px;}
+.stat-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  display:flex;align-items:center;gap:16px;
+  transition:var(--transition);
+}
+.stat-card:hover{border-color:var(--border-accent);background:var(--bg-hover);}
+.stat-icon{
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.stat-icon.gold{background:var(--accent-glow);color:var(--accent);}
+.stat-icon.blue{background:rgba(75,158,232,0.15);color:var(--blue);}
+.stat-icon.green{background:rgba(75,232,122,0.12);color:var(--green);}
+.stat-icon.red{background:rgba(232,75,75,0.12);color:var(--red);}
+
+/* SECTION HEADER */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.section-title{font-size:18px;font-weight:700;color:var(--text-primary);}
+.section-title span{color:var(--accent);}
+
+/* MOVIE GRID */
+.movies-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;}
+.movie-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  transition:var(--transition);cursor:pointer;
+}
+.movie-card:hover{transform:translateY(-4px);border-color:var(--border-accent);box-shadow:0 12px 40px rgba(0,0,0,0.5);}
+.movie-poster{width:100%;aspect-ratio:2/3;object-fit:cover;background:var(--bg-hover);}
+.movie-poster-placeholder{
+  width:100%;aspect-ratio:2/3;background:var(--bg-hover);
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;color:var(--text-muted);
+}
+.movie-info{padding:14px;}
+.movie-title{font-weight:700;font-size:14px;margin-bottom:6px;color:var(--text-primary);line-height:1.3;}
+.movie-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.movie-genre{
+  font-size:11px;font-weight:600;color:var(--accent);
+  background:var(--accent-glow);padding:2px 8px;border-radius:20px;
+}
+.movie-year{font-size:12px;color:var(--text-muted);}
+.movie-rating{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;}
+.movie-rating i{font-size:12px;}
+.movie-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#0d0d18 0%,#1a1528 50%,#0d0d18 100%);
+  border:1px solid var(--border);border-radius:16px;
+  padding:56px 48px;margin-bottom:36px;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-40%;right:-10%;
+  width:500px;height:500px;
+  background:radial-gradient(circle,rgba(232,184,75,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent-glow);border:1px solid var(--border-accent);
+  color:var(--accent);font-size:12px;font-weight:700;
+  padding:5px 14px;border-radius:20px;margin-bottom:20px;
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.hero h1{font-size:40px;font-weight:900;line-height:1.15;color:var(--text-primary);margin-bottom:14px;max-width:580px;}
+.hero h1 em{color:var(--accent);font-style:normal;}
+.hero p{font-size:16px;color:var(--text-secondary);max-width:500px;margin-bottom:28px;line-height:1.7;}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
+.hero-deco{position:absolute;right:48px;top:50%;transform:translateY(-50%);font-size:120px;opacity:.04;pointer-events:none;}
+
+/* REVIEWS */
+.reviews-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;}
+.review-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;transition:var(--transition);
+}
+.review-card:hover{border-color:var(--border-accent);}
+.review-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.review-avatar{
+  width:38px;height:38px;background:var(--accent);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:var(--bg-base);flex-shrink:0;
+}
+.review-author{font-weight:700;font-size:14px;}
+.review-movie{font-size:12px;color:var(--text-muted);}
+.review-stars{color:var(--accent);font-size:13px;margin-bottom:8px;}
+.review-text{font-size:14px;color:var(--text-secondary);line-height:1.6;}
+.review-date{font-size:11px;color:var(--text-muted);margin-top:10px;}
+
+/* WATCHLIST */
+.watchlist-list{display:flex;flex-direction:column;gap:14px;}
+.watchlist-item{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 20px;
+  display:flex;align-items:center;gap:16px;
+  transition:var(--transition);
+}
+.watchlist-item:hover{border-color:var(--border-accent);}
+.watchlist-poster{width:50px;height:75px;object-fit:cover;border-radius:6px;background:var(--bg-hover);flex-shrink:0;}
+.watchlist-poster-placeholder{width:50px;height:75px;background:var(--bg-hover);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--text-muted);flex-shrink:0;}
+.watchlist-info{flex:1;}
+.watchlist-title{font-weight:700;font-size:15px;margin-bottom:4px;}
+.watchlist-meta{font-size:12px;color:var(--text-muted);}
+
+/* PROFILE */
+.profile-header{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px;
+  display:flex;align-items:center;gap:22px;margin-bottom:28px;
+}
+.profile-avatar{
+  width:72px;height:72px;background:var(--accent);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:800;color:var(--bg-base);flex-shrink:0;
+}
+.profile-name{font-size:22px;font-weight:800;}
+.profile-username{font-size:14px;color:var(--text-muted);margin-top:2px;}
+.profile-email{font-size:13px;color:var(--text-secondary);margin-top:6px;}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.profile-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.profile-section-title{font-size:15px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+
+/* FORMS */
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:7px;letter-spacing:.3px;}
+.form-control{
+  width:100%;padding:11px 14px;
+  background:var(--bg-base);
+  border:1px solid var(--border);
+  border-radius:8px;color:var(--text-primary);
+  transition:var(--transition);
+}
+.form-control:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+.form-control::placeholder{color:var(--text-muted);}
+select.form-control option{background:var(--bg-card);}
+textarea.form-control{resize:vertical;min-height:100px;}
+
+/* AUTH */
+.auth-wrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--bg-base);padding:24px;
+}
+.auth-card{
+  width:100%;max-width:440px;
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:16px;padding:36px;
+}
+.auth-logo{text-align:center;margin-bottom:24px;}
+.auth-logo-img{width:140px;height:140px;margin:0 auto 24px;display:block;filter:drop-shadow(0 0 15px rgba(255,215,0,0.3));transition:all .3s ease;}
+.auth-logo-img:hover{transform:scale(1.08);filter:drop-shadow(0 0 25px rgba(255,215,0,0.5));}
+.auth-logo h2{font-size:24px;font-weight:900;background:linear-gradient(135deg,var(--text-primary) 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.auth-logo p{font-size:14px;color:var(--text-secondary);margin-top:8px;letter-spacing:.5px;}
+.auth-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--text-muted);}
+.auth-footer a{color:var(--accent);cursor:pointer;}
+
+/* BADGE */
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.badge-gold{background:var(--accent-glow);color:var(--accent);}
+.badge-blue{background:rgba(75,158,232,0.15);color:var(--blue);}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;align-items:center;}
+.filter-bar .form-control{max-width:260px;}
+.filter-bar select.form-control{max-width:160px;}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted);}
+.empty-state i{font-size:48px;margin-bottom:16px;opacity:.5;display:block;}
+.empty-state p{font-size:15px;}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:10px;padding:14px 18px;
+  display:flex;align-items:center;gap:12px;
+  min-width:280px;box-shadow:0 8px 30px rgba(0,0,0,0.5);
+  animation:toastIn .3s ease;
+}
+.toast.success{border-left:3px solid var(--green);}
+.toast.error{border-left:3px solid var(--red);}
+.toast.info{border-left:3px solid var(--blue);}
+.toast-icon{font-size:16px;}
+.toast.success .toast-icon{color:var(--green);}
+.toast.error .toast-icon{color:var(--red);}
+.toast.info .toast-icon{color:var(--blue);}
+.toast-msg{font-size:13px;font-weight:500;color:var(--text-primary);}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:none;}}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.75);
+  z-index:200;display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:16px;padding:28px;width:100%;max-width:480px;
+  max-height:90vh;overflow-y:auto;position:relative;
+}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  background:var(--bg-hover);border:none;color:var(--text-muted);
+  width:32px;height:32px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  transition:var(--transition);
+}
+.modal-close:hover{color:var(--text-primary);}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px;}
+
+/* STAR RATING */
+.star-rating{display:flex;gap:6px;flex-direction:row-reverse;justify-content:flex-end;}
+.star-rating input{display:none;}
+.star-rating label{cursor:pointer;font-size:22px;color:var(--text-muted);transition:var(--transition);}
+.star-rating label:hover,.star-rating label:hover~label,
+.star-rating input:checked~label{color:var(--accent);}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:24px 0;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .profile-grid{grid-template-columns:1fr;}
+}
+@media(max-width:700px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s;}
+  .sidebar.open{transform:none;}
+  .main{margin-left:0;}
+  .hero{padding:32px 24px;}
+  .hero h1{font-size:26px;}
+  .page-content{padding:20px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ APP SHELL ═══════════════════════════════ -->
+<div id="appShell" style="display:none;">
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <img src="/static/logo.svg" alt="Cinema Insight" class="sidebar-logo-img">
+        <div class="logo-text"><span>Cinema</span> Insight</div>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-page="home"><i class="fas fa-home"></i> Home</button>
+        <button class="nav-item" data-page="browse"><i class="fas fa-film"></i> Browse Movies</button>
+        <button class="nav-item" data-page="reviews"><i class="fas fa-star"></i> Reviews</button>
+        <button class="nav-item" data-page="watchlist"><i class="fas fa-bookmark"></i> Watchlist</button>
+        <button class="nav-item" data-page="profile"><i class="fas fa-user"></i> Profile</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="sidebarAvatarLetter">A</div>
+          <div>
+            <div class="sidebar-username" id="sidebarName">Admin User</div>
+            <div class="sidebar-role" id="sidebarUsername">@admin</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-title" id="topbarTitle">Cinema Insight</div>
+        <div class="topbar-actions">
+          <span style="font-size:13px;color:var(--text-muted);">Hello, <b id="topbarName" style="color:var(--accent);">Admin</b></span>
+        </div>
+      </div>
+
+      <div class="page-content">
+
+        <!-- HOME PAGE -->
+        <div class="page active" id="page-home">
+          <div class="hero">
+            <div class="hero-deco">🎬</div>
+            <div class="hero-tag"><i class="fas fa-film"></i> Cinema Insight</div>
+            <h1>Discover Great Films<br><em>Worth Your Time</em></h1>
+            <p>Curate your watchlist, share reviews, and explore cinema across every genre and era.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" onclick="navigate('browse')"><i class="fas fa-film"></i> Browse Movies</button>
+              <button class="btn btn-secondary" onclick="navigate('reviews')"><i class="fas fa-star"></i> Read Reviews</button>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon gold"><i class="fas fa-film"></i></div>
+              <div><div class="card-title">Total Movies</div><div class="card-value accent" id="statMovies">12</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon blue"><i class="fas fa-comments"></i></div>
+              <div><div class="card-title">Reviews</div><div class="card-value" id="statReviews">0</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-star"></i></div>
+              <div><div class="card-title">Average Rating</div><div class="card-value" id="statAvg">8.5</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon red"><i class="fas fa-tag"></i></div>
+              <div><div class="card-title">Genres</div><div class="card-value" id="statGenres">7</div></div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <div class="section-title"><span>★</span> Top Rated Movies</div>
+            <button class="btn btn-ghost btn-sm" onclick="navigate('browse')">View All <i class="fas fa-arrow-right"></i></button>
+          </div>
+          <div class="movies-grid" id="homeMoviesGrid"></div>
+        </div>
+
+        <!-- BROWSE PAGE -->
+        <div class="page" id="page-browse">
+          <div class="section-header">
+            <div class="section-title">Browse <span>Movies</span></div>
+            <span class="badge badge-gold" id="browseCount">12 films</span>
+          </div>
+          <div class="filter-bar">
+            <input type="text" id="searchInput" class="form-control" placeholder="🔍  Search by title…" oninput="filterMovies()">
+            <select id="genreFilter" class="form-control" onchange="filterMovies()">
+              <option value="">All Genres</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="openReviewModal(null)"><i class="fas fa-plus"></i> Write Review</button>
+          </div>
+          <div class="movies-grid" id="browseMoviesGrid"></div>
+        </div>
+
+        <!-- REVIEWS PAGE -->
+        <div class="page" id="page-reviews">
+          <div class="section-header">
+            <div class="section-title"><span>★</span> Community Reviews</div>
+            <button class="btn btn-primary btn-sm" onclick="openReviewModal(null)"><i class="fas fa-plus"></i> Write Review</button>
+          </div>
+          <div class="reviews-grid" id="reviewsGrid"></div>
+          <div class="empty-state" id="reviewsEmpty" style="display:none;">
+            <i class="fas fa-star"></i>
+            <p>No reviews yet. Be the first to share your thoughts!</p>
+          </div>
+        </div>
+
+        <!-- WATCHLIST PAGE -->
+        <div class="page" id="page-watchlist">
+          <div class="section-header">
+            <div class="section-title">My <span>Watchlist</span></div>
+            <span class="badge badge-gold" id="watchlistCount">0 saved</span>
+          </div>
+          <div class="watchlist-list" id="watchlistContainer"></div>
+          <div class="empty-state" id="watchlistEmpty" style="display:none;">
+            <i class="fas fa-bookmark"></i>
+            <p>Your watchlist is empty. <a style="color:var(--accent);cursor:pointer;" onclick="navigate('browse')">Browse movies</a> to add some!</p>
+          </div>
+        </div>
+
+        <!-- PROFILE PAGE -->
+        <div class="page" id="page-profile">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatarLetter">A</div>
+            <div>
+              <div class="profile-name" id="profileName">Admin User</div>
+              <div class="profile-username" id="profileUsername">@admin</div>
+              <div class="profile-email"><i class="fas fa-envelope" style="font-size:11px;color:var(--accent);"></i> <span id="profileEmail">admin@cinema.com</span></div>
+              <div style="margin-top:10px;display:flex;gap:16px;">
+                <span class="badge badge-blue" id="profileReviewCount">0 Reviews</span>
+                <span class="badge badge-gold" id="profileWatchlistCount">0 Watchlist</span>
+              </div>
+            </div>
+          </div>
+          <div class="profile-grid">
+            <div class="profile-section">
+              <div class="profile-section-title"><i class="fas fa-star" style="color:var(--accent);"></i> My Reviews</div>
+              <div id="profileReviews"></div>
+            </div>
+            <div class="profile-section">
+              <div class="profile-section-title"><i class="fas fa-bookmark" style="color:var(--accent);"></i> My Watchlist</div>
+              <div id="profileWatchlist"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /page-content -->
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ AUTH PAGES ═══════════════════════════════ -->
+
+<!-- LOGIN -->
+<div id="authLogin" style="display:none;">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="/static/logo.svg" alt="Cinema Insight" class="auth-logo-img">
+        <h2>Welcome Back</h2>
+        <p>Sign in to Cinema Insight</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username or Email</label>
+        <input type="text" id="loginIdentifier" class="form-control" placeholder="Enter username or email" autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="loginPassword" class="form-control" placeholder="Enter password">
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="doLogin()">
+        <i class="fas fa-sign-in-alt"></i> Sign In
+      </button>
+      <div class="auth-footer">Don't have an account? <a onclick="showRegister()">Create one</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="authRegister" style="display:none;">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="/static/logo.svg" alt="Cinema Insight" class="auth-logo-img">
+        <h2>Create Account</h2>
+        <p>Join Cinema Insight today</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" id="regFullName" class="form-control" placeholder="Your full name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" id="regUsername" class="form-control" placeholder="Choose a username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="regEmail" class="form-control" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" id="regPhone" class="form-control" placeholder="+1 (000) 000-0000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="regPassword" class="form-control" placeholder="Create a strong password">
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="doRegister()">
+        <i class="fas fa-user-plus"></i> Create Account
+      </button>
+      <div class="auth-footer">Already have an account? <a onclick="showLogin()">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('reviewModal')"><i class="fas fa-times"></i></button>
+    <div class="modal-title"><i class="fas fa-star" style="color:var(--accent);"></i> Write a Review</div>
+    <div class="form-group">
+      <label class="form-label">Movie</label>
+      <select class="form-control" id="review_movie_id"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Your Rating</label>
+      <div class="star-rating" id="starRating">
+        <input type="radio" name="rating" id="s10" value="10"><label for="s10">★</label>
+        <input type="radio" name="rating" id="s9"  value="9"><label for="s9">★</label>
+        <input type="radio" name="rating" id="s8"  value="8"><label for="s8">★</label>
+        <input type="radio" name="rating" id="s7"  value="7"><label for="s7">★</label>
+        <input type="radio" name="rating" id="s6"  value="6"><label for="s6">★</label>
+        <input type="radio" name="rating" id="s5"  value="5"><label for="s5">★</label>
+        <input type="radio" name="rating" id="s4"  value="4"><label for="s4">★</label>
+        <input type="radio" name="rating" id="s3"  value="3"><label for="s3">★</label>
+        <input type="radio" name="rating" id="s2"  value="2"><label for="s2">★</label>
+        <input type="radio" name="rating" id="s1"  value="1"><label for="s1">★</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Review</label>
+      <textarea class="form-control" id="review_text" placeholder="Share your thoughts about this film…"></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="submitReview()">
+      <i class="fas fa-paper-plane"></i> Submit Review
+    </button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let MOVIES = [];  // Will be loaded from API
+
+let state = {
+  currentUser: null,
+  watchlist: [],    // movie ids
+  reviews: [],      // {id, userId, movieId, rating, text, date}
+  reviewIdSeq: 1,
+};
+
+// ═══════════════════════════════════════════════
+//  LOAD MOVIES FROM API
+// ═══════════════════════════════════════════════
+async function loadMovies(){
+  try {
+    const res = await fetch('/api/movies');
+    if(res.ok){
+      MOVIES = await res.json();
+      console.log('Loaded ' + MOVIES.length + ' movies');
+    }
+  } catch(e){
+    console.error('Failed to load movies:', e);
+  }
+}
+
+// Load movies on page load
+loadMovies();
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg, type='info'){
+  const tc = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = {success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle'};
+  t.innerHTML = `<i class="fas ${icons[type]||icons.info} toast-icon"></i><span class="toast-msg">${msg}</span>`;
+  tc.appendChild(t);
+  setTimeout(()=>{
+    t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='.3s';
+    setTimeout(()=>t.remove(), 320);
+  }, 3500);
+}
+
+// ═══════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m =>
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); })
+);
+
+// ═══════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════
+function showView(which){
+  document.getElementById('appShell').style.display   = which==='app'      ? '' : 'none';
+  document.getElementById('authLogin').style.display  = which==='login'    ? '' : 'none';
+  document.getElementById('authRegister').style.display = which==='register' ? '' : 'none';
+}
+function showLogin(){ showView('login'); }
+function showRegister(){ showView('register'); }
+
+function doLogin(){
+  const id  = document.getElementById('loginIdentifier').value.trim();
+  const pwd = document.getElementById('loginPassword').value;
+  if(!id||!pwd){ showToast('Please fill in all fields','error'); return; }
+  
+  // Call API endpoint
+  fetch('/api/auth/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({identifier: id, password: pwd})
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      state.currentUser = data.user;
+      state.watchlist = [];
+      state.reviews = [];
+      initApp();
+      showToast('Welcome back, '+data.user.full_name+'!','success');
+    } else {
+      showToast(data.message,'error');
+    }
+  })
+  .catch(e => {
+    console.error(e);
+    showToast('Login failed','error');
+  });
+}
+
+function doRegister(){
+  const fn  = document.getElementById('regFullName').value.trim();
+  const un  = document.getElementById('regUsername').value.trim();
+  const em  = document.getElementById('regEmail').value.trim();
+  const ph  = document.getElementById('regPhone').value.trim();
+  const pwd = document.getElementById('regPassword').value;
+  if(!fn||!un||!em||!pwd){ showToast('Please fill in all required fields','error'); return; }
+  
+  // Call API endpoint
+  fetch('/api/auth/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({full_name: fn, username: un, email: em, phone: ph, password: pwd})
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      state.currentUser = data.user;
+      state.watchlist = [];
+      state.reviews = [];
+      initApp();
+      showToast('Account created! Welcome, '+fn+'!','success');
+    } else {
+      showToast(data.message,'error');
+    }
+  })
+  .catch(e => {
+    console.error(e);
+    showToast('Registration failed','error');
+  });
+}
+
+function logout(){
+  state.currentUser = null;
+  state.watchlist = [];
+  state.reviews = [];
+  showView('login');
+  // clear login fields
+  document.getElementById('loginIdentifier').value='';
+  document.getElementById('loginPassword').value='';
+}
+
+// ═══════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════
+const PAGE_TITLES = {
+  home:'Home', browse:'Browse Movies', reviews:'Reviews', watchlist:'My Watchlist', profile:'My Profile'
+};
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[page]||'Cinema Insight';
+  if(page==='reviews') renderReviews();
+  if(page==='watchlist') renderWatchlist();
+  if(page==='profile') renderProfile();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.nav-item').forEach(btn =>
+  btn.addEventListener('click', ()=> navigate(btn.dataset.page))
+);
+
+// ═══════════════════════════════════════════════
+//  INIT APP
+// ═══════════════════════════════════════════════
+function initApp(){
+  const u = state.currentUser;
+  // sidebar
+  document.getElementById('sidebarAvatarLetter').textContent = u.full_name[0].toUpperCase();
+  document.getElementById('sidebarName').textContent = u.full_name;
+  document.getElementById('sidebarUsername').textContent = '@'+u.username;
+  document.getElementById('topbarName').textContent = u.full_name.split(' ')[0];
+  showView('app');
+  renderHomeMovies();
+  renderBrowse();
+  updateStats();
+  navigate('home');
+}
+
+// ═══════════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════════
+function updateStats(){
+  document.getElementById('statMovies').textContent  = MOVIES.length;
+  document.getElementById('statReviews').textContent = state.reviews.length;
+  const avg = state.reviews.length
+    ? (state.reviews.reduce((s,r)=>s+r.rating,0)/state.reviews.length).toFixed(1)
+    : '—';
+  document.getElementById('statAvg').textContent = avg;
+  const genres = [...new Set(MOVIES.map(m=>m.genre))];
+  document.getElementById('statGenres').textContent = genres.length;
+}
+
+// ═══════════════════════════════════════════════
+//  MOVIE CARD BUILDER
+// ═══════════════════════════════════════════════
+function buildMovieCard(m, showWatchlistBtn=false){
+  const inWL = state.watchlist.includes(m.id);
+  const avgRating = movieAvgRating(m.id);
+  const reviewCount = movieReviewCount(m.id);
+  return `
+    <div class="movie-card" data-title="${m.title.toLowerCase()}" data-genre="${m.genre}">
+      ${m.poster_url
+        ? `<img class="movie-poster" src="${m.poster_url}" alt="${m.title}" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+           <div class="movie-poster-placeholder" style="display:none;">🎬</div>`
+        : `<div class="movie-poster-placeholder">🎬</div>`}
+      <div class="movie-info">
+        <div class="movie-title">${m.title}</div>
+        <div class="movie-meta">
+          <span class="movie-genre">${m.genre}</span>
+          <span class="movie-year">${m.release_year}</span>
+        </div>
+        <div class="movie-rating">
+          <i class="fas fa-star"></i> ${avgRating}/10
+          <span style="color:var(--text-muted);font-weight:400;font-size:11px;">(${reviewCount} reviews)</span>
+        </div>
+        ${m.director ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Dir. ${m.director}</div>` : ''}
+        <div class="movie-actions">
+          ${showWatchlistBtn ? `
+          <button class="btn btn-sm ${inWL?'btn-danger in-watchlist':'btn-secondary'}"
+                  onclick="toggleWatchlist(${m.id}, this)">
+            ${inWL ? '<i class="fas fa-times"></i> Remove' : '<i class="fas fa-bookmark"></i> Watchlist'}
+          </button>` : ''}
+          <button class="btn btn-primary btn-sm" onclick="openReviewModal(${m.id})">
+            <i class="fas fa-star"></i> Review
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function movieAvgRating(id){
+  const rs = state.reviews.filter(r=>r.movieId===id);
+  if(!rs.length) return MOVIES.find(m=>m.id===id)?.rating.toFixed(1)||'—';
+  return (rs.reduce((s,r)=>s+r.rating,0)/rs.length).toFixed(1);
+}
+function movieReviewCount(id){
+  return state.reviews.filter(r=>r.movieId===id).length;
+}
+
+// ═══════════════════════════════════════════════
+//  HOME MOVIES (top 6 by rating)
+// ═══════════════════════════════════════════════
+function renderHomeMovies(){
+  const sorted = [...MOVIES].sort((a,b)=>b.rating-a.rating).slice(0,6);
+  document.getElementById('homeMoviesGrid').innerHTML = sorted.map(m=>buildMovieCard(m,false)).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  BROWSE
+// ═══════════════════════════════════════════════
+function renderBrowse(){
+  // populate genre filter
+  const sel = document.getElementById('genreFilter');
+  const genres = [...new Set(MOVIES.map(m=>m.genre))].sort();
+  sel.innerHTML = '<option value="">All Genres</option>' +
+    genres.map(g=>`<option value="${g}">${g}</option>`).join('');
+
+  document.getElementById('browseMoviesGrid').innerHTML =
+    MOVIES.map(m=>buildMovieCard(m,true)).join('');
+  document.getElementById('browseCount').textContent = MOVIES.length+' films';
+}
+
+function filterMovies(){
+  const q = (document.getElementById('searchInput').value||'').toLowerCase();
+  const g = document.getElementById('genreFilter').value;
+  document.querySelectorAll('#browseMoviesGrid .movie-card').forEach(c=>{
+    const title = c.dataset.title||'';
+    const genre = c.dataset.genre||'';
+    c.style.display = ((!q||title.includes(q))&&(!g||genre===g)) ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  WATCHLIST
+// ═══════════════════════════════════════════════
+function toggleWatchlist(movieId, btn){
+  const inWL = btn.classList.contains('in-watchlist');
+  if(inWL){
+    state.watchlist = state.watchlist.filter(id=>id!==movieId);
+    btn.classList.remove('in-watchlist','btn-danger');
+    btn.classList.add('btn-secondary');
+    btn.innerHTML = '<i class="fas fa-bookmark"></i> Watchlist';
+    showToast('Removed from watchlist','info');
+  } else {
+    state.watchlist.push(movieId);
+    btn.classList.add('in-watchlist','btn-danger');
+    btn.classList.remove('btn-secondary');
+    btn.innerHTML = '<i class="fas fa-times"></i> Remove';
+    showToast('Added to watchlist!','success');
+  }
+}
+
+function renderWatchlist(){
+  const items = MOVIES.filter(m=>state.watchlist.includes(m.id));
+  document.getElementById('watchlistCount').textContent = items.length+' saved';
+  document.getElementById('watchlistEmpty').style.display = items.length?'none':'';
+  document.getElementById('watchlistContainer').innerHTML = items.map(m=>`
+    <div class="watchlist-item" id="wl-${m.id}">
+      ${m.poster_url
+        ? `<img class="watchlist-poster" src="${m.poster_url}" alt="${m.title}" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+           <div class="watchlist-poster-placeholder" style="display:none;">🎬</div>`
+        : `<div class="watchlist-poster-placeholder">🎬</div>`}
+      <div class="watchlist-info">
+        <div class="watchlist-title">${m.title}</div>
+        <div class="watchlist-meta">
+          <span class="badge badge-gold" style="margin-right:8px;">${m.genre}</span>
+          ${m.release_year} &nbsp;·&nbsp; ⭐ ${movieAvgRating(m.id)}/10
+          ${m.director ? `&nbsp;·&nbsp; Dir. ${m.director}` : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-shrink:0;">
+        <button class="btn btn-primary btn-sm" onclick="openReviewModal(${m.id})"><i class="fas fa-star"></i> Review</button>
+        <button class="btn btn-danger btn-sm" onclick="removeWL(${m.id})"><i class="fas fa-trash"></i> Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+function removeWL(movieId){
+  state.watchlist = state.watchlist.filter(id=>id!==movieId);
+  const el = document.getElementById('wl-'+movieId);
+  if(el){ el.style.opacity='0'; el.style.transform='translateX(20px)'; el.style.transition='.3s'; setTimeout(()=>el.remove(),310); }
+  showToast('Removed from watchlist','info');
+  // also update browse card button if visible
+  setTimeout(()=>renderBrowse(), 400);
+}
+
+// ═══════════════════════════════════════════════
+//  REVIEWS
+// ═══════════════════════════════════════════════
+function openReviewModal(movieId){
+  const sel = document.getElementById('review_movie_id');
+  sel.innerHTML = '<option value="">Select a movie…</option>' +
+    MOVIES.map(m=>`<option value="${m.id}">${m.title}</option>`).join('');
+  if(movieId) sel.value = movieId;
+  // reset
+  document.getElementById('review_text').value='';
+  document.querySelectorAll('#starRating input').forEach(r=>r.checked=false);
+  openModal('reviewModal');
+}
+
+function submitReview(){
+  const movieId = parseInt(document.getElementById('review_movie_id').value);
+  const ratingEl = document.querySelector('#starRating input[name="rating"]:checked');
+  const text = document.getElementById('review_text').value.trim();
+  if(!movieId||!ratingEl){ showToast('Please select a movie and rating','error'); return; }
+  state.reviews.push({
+    id: state.reviewIdSeq++,
+    userId: state.currentUser.id,
+    movieId,
+    rating: parseInt(ratingEl.value),
+    text,
+    date: new Date().toISOString().slice(0,10),
+    userName: state.currentUser.full_name,
+    username: state.currentUser.username,
+  });
+  closeModal('reviewModal');
+  showToast('Review submitted!','success');
+  updateStats();
+  renderReviews();
+}
+
+function renderReviews(){
+  const grid = document.getElementById('reviewsGrid');
+  const empty = document.getElementById('reviewsEmpty');
+  if(!state.reviews.length){ grid.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display='none';
+  grid.innerHTML = [...state.reviews].reverse().map(rv=>{
+    const movie = MOVIES.find(m=>m.id===rv.movieId);
+    const stars = '★'.repeat(rv.rating) + `<span style="color:var(--text-muted);">${'★'.repeat(10-rv.rating)}</span>`;
+    return `
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">${rv.userName[0].toUpperCase()}</div>
+          <div>
+            <div class="review-author">${rv.userName}</div>
+            <div class="review-movie"><i class="fas fa-film" style="color:var(--accent);font-size:10px;"></i> ${movie?.title||'Unknown'}</div>
+          </div>
+        </div>
+        <div class="review-stars">${stars} <span style="color:var(--text-muted);font-size:12px;margin-left:6px;">${rv.rating}/10</span></div>
+        ${rv.text ? `<div class="review-text">${rv.text}</div>` : ''}
+        <div class="review-date"><i class="fas fa-clock" style="font-size:10px;"></i> ${rv.date}</div>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  PROFILE
+// ═══════════════════════════════════════════════
+function renderProfile(){
+  const u = state.currentUser;
+  document.getElementById('profileAvatarLetter').textContent = u.full_name[0].toUpperCase();
+  document.getElementById('profileName').textContent = u.full_name;
+  document.getElementById('profileUsername').textContent = '@'+u.username;
+  document.getElementById('profileEmail').textContent = u.email;
+
+  const myReviews = state.reviews.filter(r=>r.userId===u.id);
+  const myWL = MOVIES.filter(m=>state.watchlist.includes(m.id));
+  document.getElementById('profileReviewCount').textContent = myReviews.length+' Reviews';
+  document.getElementById('profileWatchlistCount').textContent = myWL.length+' Watchlist';
+
+  // reviews section
+  const pr = document.getElementById('profileReviews');
+  if(myReviews.length){
+    pr.innerHTML = `<div style="display:flex;flex-direction:column;gap:14px;">${
+      myReviews.map(rv=>{
+        const movie = MOVIES.find(m=>m.id===rv.movieId);
+        return `<div style="padding:14px;background:var(--bg-hover);border-radius:8px;border:1px solid var(--border);">
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">${movie?.title||'Unknown'}</div>
+          <div style="color:var(--accent);font-size:13px;margin-bottom:6px;">${'★'.repeat(rv.rating)} ${rv.rating}/10</div>
+          ${rv.text ? `<div style="font-size:13px;color:var(--text-secondary);">${rv.text}</div>` : ''}
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">${rv.date}</div>
+        </div>`;
+      }).join('')
+    }</div>`;
+  } else {
+    pr.innerHTML = `<div class="empty-state" style="padding:30px 0;">
+      <i class="fas fa-star"></i>
+      <p>No reviews yet. <a style="color:var(--accent);cursor:pointer;" onclick="navigate('browse')">Browse movies</a> to start!</p>
+    </div>`;
+  }
+
+  // watchlist section
+  const pw = document.getElementById('profileWatchlist');
+  if(myWL.length){
+    pw.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px;">${
+      myWL.map(m=>`<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--bg-hover);border-radius:8px;border:1px solid var(--border);">
+        ${m.poster_url
+          ? `<img src="${m.poster_url}" style="width:38px;height:56px;object-fit:cover;border-radius:5px;flex-shrink:0;" loading="lazy" onerror="this.style.display='none';">`
+          : `<div style="width:38px;height:56px;background:var(--bg-base);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🎬</div>`}
+        <div>
+          <div style="font-weight:700;font-size:13px;">${m.title}</div>
+          <div style="font-size:11px;color:var(--text-muted);">${m.genre} · ${m.release_year}</div>
+          <div style="font-size:12px;color:var(--accent);">⭐ ${movieAvgRating(m.id)}</div>
+        </div>
+      </div>`).join('')
+    }</div>`;
+  } else {
+    pw.innerHTML = `<div class="empty-state" style="padding:30px 0;">
+      <i class="fas fa-bookmark"></i>
+      <p>Nothing saved. <a style="color:var(--accent);cursor:pointer;" onclick="navigate('browse')">Add movies!</a></p>
+    </div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  BOOT — start on login screen
+// ═══════════════════════════════════════════════
+showView('login');
+</script>
+</body>
+</html>
